@@ -191,6 +191,16 @@ describe("assembleNode", () => {
     );
     expect(anyEdgeReferencesNode).toBe(true);
   });
+
+  it("counter is NOT incremented when opts.id is supplied (pure side-effect check)", () => {
+    // Call twice with the same opts.id — node label must be identical (counter not used for label)
+    const opts = { id: "stable-id-test" };
+    const r1 = assembleNode(MOCK_INTERVIEW, MOCK_MEMBER_COMERCIAL, opts);
+    const r2 = assembleNode(MOCK_INTERVIEW, MOCK_MEMBER_COMERCIAL, opts);
+    expect(r1.node.id).toBe("stable-id-test");
+    expect(r2.node.id).toBe("stable-id-test");
+    expect(r1.node.label).toBe(r2.node.label);
+  });
 });
 
 // ── prioritizeOpportunities ───────────────────────────────────────────────────

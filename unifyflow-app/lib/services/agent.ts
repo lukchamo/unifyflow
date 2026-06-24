@@ -137,9 +137,9 @@ export function makeLog(
   output: string,
   opts?: MakeLogOpts
 ): AgentLog {
-  _logCounter += 1;
+  const id = opts?.id ?? `log-${++_logCounter}`;
   return {
-    id: opts?.id ?? `log-${_logCounter}`,
+    id,
     orgId: opts?.orgId ?? "o1",
     tipoDecision,
     input,
@@ -167,8 +167,7 @@ export function assembleNode(
   member: Member,
   opts?: AssembleNodeOpts
 ): { node: ProcessNode; edges: Handoff[]; log: AgentLog } {
-  _nodeCounter += 1;
-  const idx = _nodeCounter;
+  const idx = opts?.id ? _nodeCounter : ++_nodeCounter;
 
   const nodeId = opts?.id ?? `node-draft-${idx}`;
   // When opts.id is supplied, derive the label index from the id string so the
@@ -197,19 +196,22 @@ export function assembleNode(
     steps: ["Identificar necesidad", "Documentar proceso", "Validar con el equipo"],
   });
 
-  // Build at least one Handoff linking to the nearest existing area node
+  // Build at least one Handoff linking to the nearest existing area node.
+  // If no area node and no fallback node exists, return empty edges.
   const areaNode = findAreaNode(member.area);
-  const targetNodeId = areaNode?.id ?? (MOCK_NODES[0]?.id ?? "n1");
+  const targetNodeId = areaNode?.id ?? MOCK_NODES[0]?.id;
 
-  const edges: Handoff[] = [
-    {
-      id: `edge-draft-${idx}`,
-      orgId: "o1",
-      fromNodeId: nodeId,
-      toNodeId: targetNodeId,
-      dashed: true,
-    },
-  ];
+  const edges: Handoff[] = targetNodeId
+    ? [
+        {
+          id: `edge-draft-${idx}`,
+          orgId: "o1",
+          fromNodeId: nodeId,
+          toNodeId: targetNodeId,
+          dashed: true,
+        },
+      ]
+    : [];
 
   const log = makeLog(
     "ensamblado",
