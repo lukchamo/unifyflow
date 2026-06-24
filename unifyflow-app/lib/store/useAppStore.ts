@@ -33,6 +33,7 @@ import {
   prioritizeOpportunities,
   makeLog,
 } from "@/lib/services/agent";
+import { realtime } from "@/lib/services/realtime";
 import type { PaletteName } from "@/lib/theme/palettes";
 
 // ── NavStep ───────────────────────────────────────────────────────────────────
@@ -183,8 +184,9 @@ export const useAppStore = create<AppState>()(
           agentLogs: [...s.agentLogs, log],
         }));
 
-        // Realtime hook point: onInterviewSubmitted(node, log)
-        // Task 1.7 will wire up socket.emit here.
+        // Realtime: notify subscribers (the live map) that a new node was
+        // assembled, so the Champion's map can re-reveal it without a reload.
+        realtime.emit("interview:completed", { node, log });
       },
 
       // ── Node management ────────────────────────────────────────────────────
