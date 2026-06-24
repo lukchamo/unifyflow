@@ -15,6 +15,8 @@ import React, { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { DashboardSteps } from "@/components/steps/DashboardSteps";
+import { GuidedTour } from "@/components/demo/GuidedTour";
+import { TourButton } from "@/components/demo/TourButton";
 import { useAppStore } from "@/lib/store/useAppStore";
 import type { NavStep } from "@/lib/store/useAppStore";
 import type { Role } from "@/lib/schemas";
@@ -65,6 +67,9 @@ export default function AppPage() {
         <DeepLinkInit />
       </Suspense>
       <DashboardSteps />
+      {/* Guided tour overlay + trigger */}
+      <GuidedTour />
+      <TourButton />
     </AppShell>
   );
 }
