@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* ── Palette tokens (Salvia default) ───────────────────────────────── */
+:root {
+  --accent:       #3C7D6E;
+  --accent-dk:    #2C6457;
+  --accent-tint:  #E7F0ED;
+
+  /* Neutral surface */
+  --bg:           #FBFCFB;
+  --fg:           #1C201E;
+
+  /* Typography scale */
+  --font-newsreader: var(--font-newsreader);
+  --font-sans:       var(--font-sans);
+  --font-mono:       var(--font-mono);
+}
+
+/* ── Tailwind theme wiring ──────────────────────────────────────────── */
+@theme inline {
+  --color-background:  var(--bg);
+  --color-foreground:  var(--fg);
+  --color-accent:      var(--accent);
+  --color-accent-dk:   var(--accent-dk);
+  --color-accent-tint: var(--accent-tint);
+  --font-sans:         var(--font-sans);
+  --font-mono:         var(--font-mono);
+  --font-newsreader:   var(--font-newsreader);
+}
+
+/* ── Base body ──────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg);
+  color:            var(--fg);
+  font-family:      var(--font-sans), system-ui, sans-serif;
+}
+
+/* ── Selection highlight ────────────────────────────────────────────── */
+::selection {
+  background-color: rgba(60, 125, 110, 0.16);
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────── */
+@keyframes uf-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes uf-rise {
+  from {
+    opacity:   0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Print utility ──────────────────────────────────────────────────── */
+.no-print {
+  /* intentionally empty — display reset happens only in print below */
+}
+
+@media print {
+  /* Preserve colors and backgrounds exactly */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide chrome that should not appear in the PDF */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove the step gray background; let the sheet fill the page */
+  .radiography-step {
+    background-color: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
+}
