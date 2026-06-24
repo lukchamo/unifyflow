@@ -54,4 +54,12 @@ describe("Landing page", () => {
       screen.getByText("Oportunidades 2 y 3, bloqueadas")
     ).toBeInTheDocument();
   });
+
+  it("Showcase renders both Borrador and Validado chips (reduced-motion / no-JS users see final state)", () => {
+    render(<LandingPage />);
+    // Both chips must be in the DOM — animated one is hidden via GSAP only when
+    // motion is allowed; no-JS / reduced-motion users see both rendered.
+    expect(screen.getByText("Borrador")).toBeInTheDocument();
+    expect(screen.getByText("✓ Validado")).toBeInTheDocument();
+  });
 });

@@ -6,6 +6,38 @@
 import { describe, it, expect } from "vitest";
 import { revealTiming } from "./useMapReveal";
 import { reorganizeTiming } from "./useReorganize";
+import { revealVars } from "./useReveal";
+
+// ── revealVars ────────────────────────────────────────────────────────────────
+
+describe("revealVars", () => {
+  it("full motion: opacity 1, y 0, duration > 0, has stagger", () => {
+    const v = revealVars(false);
+    expect(v.opacity).toBe(1);
+    expect(v.y).toBe(0);
+    expect(v.duration).toBeGreaterThan(0);
+    expect(v.stagger).toBeDefined();
+    expect(typeof v.stagger === "number" ? v.stagger : 0).toBeGreaterThanOrEqual(0);
+  });
+
+  it("reduced motion: duration 0, opacity 1, y 0", () => {
+    const v = revealVars(true);
+    expect(v.opacity).toBe(1);
+    expect(v.y).toBe(0);
+    expect(v.duration).toBe(0);
+  });
+
+  it("full motion has ease string", () => {
+    const v = revealVars(false);
+    expect(typeof v.ease).toBe("string");
+  });
+
+  it("full motion stagger is non-zero positive number", () => {
+    const v = revealVars(false);
+    expect(typeof v.stagger).toBe("number");
+    expect((v.stagger as number)).toBeGreaterThan(0);
+  });
+});
 
 // ── revealTiming ──────────────────────────────────────────────────────────────
 
