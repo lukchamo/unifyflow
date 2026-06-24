@@ -35,6 +35,10 @@ import {
 } from "@/lib/services/agent";
 import type { PaletteName } from "@/lib/theme/palettes";
 
+// ── NavStep ───────────────────────────────────────────────────────────────────
+
+export type NavStep = "equipo" | "entrevista" | "mapa" | "oportunidades" | "radiografia";
+
 // ── Seed builder ──────────────────────────────────────────────────────────────
 
 function buildSeed() {
@@ -57,6 +61,7 @@ function buildSeed() {
     comments: MOCK_COMMENTS.map((c) => ({ ...c })) as Comment[],
     theme: "Salvia" as PaletteName,
     role: null as Role | null,
+    currentStep: "equipo" as NavStep,
     mapState: {
       organized: false,
       revealed: false,
@@ -98,6 +103,7 @@ interface AppActions {
   // UI
   setTheme: (name: PaletteName) => void;
   setRole: (role: Role | null) => void;
+  setStep: (step: NavStep) => void;
   setFilter: (f: string) => void;
   selectNode: (id: string | null) => void;
 
@@ -280,6 +286,10 @@ export const useAppStore = create<AppState>()(
 
       setRole: (role: Role | null) => {
         set({ role });
+      },
+
+      setStep: (step: NavStep) => {
+        set({ currentStep: step });
       },
 
       setFilter: (f: string) => {
