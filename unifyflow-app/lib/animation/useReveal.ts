@@ -2,9 +2,9 @@
  * useReveal.ts — Scroll-driven fade + slide-up reveal helpers.
  *
  * Exports:
- *   revealVars(reduced)  — pure tween-vars helper (unit-testable, no DOM needed).
- *   useReveal(scopeRef)  — React hook that wires ScrollTrigger reveals to all
- *                          [data-reveal] elements inside a ref scope.
+ *   revealVars(reduced)       — pure tween-vars helper (unit-testable, no DOM needed).
+ *   useReveal(scopeRef, opts) — React hook that wires ScrollTrigger reveals to all
+ *                               [data-reveal] elements inside a ref scope.
  *
  * Pattern: visible-by-default.
  *   Elements start visible in CSS (no opacity:0 in markup).
@@ -18,6 +18,15 @@ import type { RefObject } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+export interface UseRevealOptions {
+  /** If true, each [data-reveal] child staggers independently (default: false) */
+  stagger?: boolean;
+  /** ScrollTrigger start position (default "top 85%") */
+  start?: string;
+  /** Delay before the tween fires (seconds, default 0) */
+  delay?: number;
+}
 
 // ── Pure timing helper ─────────────────────────────────────────────────────────
 
@@ -66,7 +75,12 @@ export function revealVars(reduced: boolean): RevealVarsFull | RevealVarsReduced
  * Must be called inside a "use client" component.
  * Returns nothing; side-effect only.
  */
-export function useReveal(scopeRef: RefObject<HTMLElement | null>): void {
+export function useReveal(
+  scopeRef: RefObject<HTMLElement | null>,
+  opts: UseRevealOptions = {}
+): void {
+  const { stagger = false, start = "top 85%", delay = 0 } = opts;
+
   useGSAP(
     () => {
       const scope = scopeRef.current;
@@ -76,20 +90,24 @@ export function useReveal(scopeRef: RefObject<HTMLElement | null>): void {
 
       // ── Full motion: hide then reveal on scroll ────────────────────────────
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const elements = scope.querySelectorAll<HTMLElement>("[data-reveal]");
-        elements.forEach((el) => {
+        const targets = stagger
+          ? scope.querySelectorAll<HTMLElement>("[data-reveal]")
+          : [scope];
+
+        targets.forEach((el) => {
           // Hide initially only inside this branch — visible without motion
           gsap.set(el, { opacity: 0, y: 18 });
 
           ScrollTrigger.create({
             trigger: el,
-            start: "top 85%",
+            start,
             onEnter: () => {
               gsap.to(el, {
                 opacity: 1,
                 y: 0,
                 duration: 0.6,
                 ease: "power2.out",
+                delay,
                 clearProps: "transform",
               });
             },
@@ -100,12 +118,15 @@ export function useReveal(scopeRef: RefObject<HTMLElement | null>): void {
 
       // ── Reduced motion: show immediately ──────────────────────────────────
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        const elements = scope.querySelectorAll<HTMLElement>("[data-reveal]");
-        elements.forEach((el) => {
+        const targets = stagger
+          ? scope.querySelectorAll<HTMLElement>("[data-reveal]")
+          : [scope];
+
+        targets.forEach((el) => {
           gsap.set(el, { opacity: 1, y: 0, clearProps: "transform" });
         });
       });
     },
-    { scope: scopeRef, dependencies: [] }
+    { scope: scopeRef, dependencies: [stagger, start, delay] }
   );
 }

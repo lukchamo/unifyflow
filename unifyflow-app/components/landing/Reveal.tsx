@@ -21,14 +21,7 @@
  */
 
 import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-// Register plugins only in browser (not during SSR / jsdom test runs)
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, useGSAP);
-}
+import { useReveal } from "@/lib/animation/useReveal";
 
 interface RevealProps {
   children: React.ReactNode;
@@ -50,54 +43,8 @@ export default function Reveal({
 }: RevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const mm = gsap.matchMedia();
-
-      // ── Full motion ────────────────────────────────────────────────────────
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const targets = stagger
-          ? container.querySelectorAll<HTMLElement>("[data-reveal]")
-          : [container];
-
-        targets.forEach((el) => {
-          // Hide initially only inside the no-preference branch
-          gsap.set(el, { opacity: 0, y: 18 });
-
-          ScrollTrigger.create({
-            trigger: el,
-            start,
-            onEnter: () => {
-              gsap.to(el, {
-                opacity: 1,
-                y: 0,
-                duration: 0.6,
-                ease: "power2.out",
-                delay,
-                clearProps: "transform",
-              });
-            },
-            once: true,
-          });
-        });
-      });
-
-      // ── Reduced motion: show immediately ──────────────────────────────────
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        const targets = stagger
-          ? container.querySelectorAll<HTMLElement>("[data-reveal]")
-          : [container];
-
-        targets.forEach((el) => {
-          gsap.set(el, { opacity: 1, y: 0, clearProps: "transform" });
-        });
-      });
-    },
-    { scope: containerRef, dependencies: [stagger, start, delay] }
-  );
+  // Delegate all GSAP / ScrollTrigger logic to the shared hook
+  useReveal(containerRef, { stagger, start, delay });
 
   return (
     <div ref={containerRef} className={className}>

@@ -87,18 +87,20 @@ export default function Showcase() {
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const nodes = container.querySelectorAll<HTMLElement>("[data-map-node]");
+        const edges = container.querySelectorAll<HTMLElement>("[data-map-edge]");
         const badges = container.querySelectorAll<HTMLElement>("[data-map-badge]");
 
-        // Hide initially
+        // Hide initially (edges are visible by CSS default; hide here for animation)
         gsap.set(nodes, { opacity: 0, y: 12, scale: 0.95 });
+        gsap.set(edges, { opacity: 0, scaleY: 0, transformOrigin: "top center" });
         gsap.set(badges, { opacity: 0, scale: 0.8 });
 
         ScrollTrigger.create({
           trigger: container,
           start: "top 85%",
           onEnter: () => {
-            // Phase 1: nodes draw in staggered
             const tl = gsap.timeline();
+            // Phase 1: nodes draw in staggered
             tl.to(nodes, {
               opacity: 1,
               y: 0,
@@ -108,7 +110,20 @@ export default function Showcase() {
               stagger: 0.1,
               clearProps: "transform",
             });
-            // Phase 2: badges fade in after nodes finish
+            // Phase 2: edges draw down (connector lines between nodes)
+            tl.to(
+              edges,
+              {
+                opacity: 1,
+                scaleY: 1,
+                duration: 0.25,
+                ease: "power1.out",
+                stagger: 0.06,
+                clearProps: "transform",
+              },
+              "-=0.1"
+            );
+            // Phase 3: badges fade in after edges
             tl.to(
               badges,
               {
@@ -119,7 +134,7 @@ export default function Showcase() {
                 stagger: 0.08,
                 clearProps: "transform",
               },
-              "-=0.1"
+              "-=0.05"
             );
           },
           once: true,
@@ -128,8 +143,10 @@ export default function Showcase() {
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
         const nodes = container.querySelectorAll<HTMLElement>("[data-map-node]");
+        const edges = container.querySelectorAll<HTMLElement>("[data-map-edge]");
         const badges = container.querySelectorAll<HTMLElement>("[data-map-badge]");
-        gsap.set([nodes, badges], { opacity: 1, scale: 1, y: 0, clearProps: "all" });
+        // edges are visible by default via CSS; ensure all are shown instantly
+        gsap.set([nodes, edges, badges], { opacity: 1, scale: 1, y: 0, clearProps: "all" });
       });
     },
     { scope: mapCardRef, dependencies: [] }
@@ -143,12 +160,17 @@ export default function Showcase() {
 
       const mm = gsap.matchMedia();
 
+      // Full motion: Borrador is the animation-only element (starts at opacity:1 in
+      // JS, fades out), Validado is real content (starts hidden in JS, fades in).
+      // CSS default has Borrador opacity:0 (set via inline style in JSX) and
+      // Validado visible — so no-JS / SSR users always see the final state.
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         const borrador = container.querySelector<HTMLElement>("[data-chip-from]");
         const validado = container.querySelector<HTMLElement>("[data-chip-to]");
         if (!borrador || !validado) return;
 
-        // Initial state: validado is hidden, borrador visible
+        // Override CSS defaults for the animation: show Borrador, hide Validado
+        gsap.set(borrador, { opacity: 1 });
         gsap.set(validado, { opacity: 0, scale: 0.85 });
 
         ScrollTrigger.create({
@@ -163,7 +185,7 @@ export default function Showcase() {
               duration: 0.3,
               ease: "power2.in",
             });
-            // Validado fades in
+            // Validado fades in — ends matching the CSS default state
             tl.to(
               validado,
               {
@@ -180,13 +202,11 @@ export default function Showcase() {
         });
       });
 
+      // Reduced motion: CSS defaults already correct (Validado visible, Borrador
+      // hidden via inline style). No gsap.set needed — do nothing.
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        const borrador = container.querySelector<HTMLElement>("[data-chip-from]");
-        const validado = container.querySelector<HTMLElement>("[data-chip-to]");
-        if (!borrador || !validado) return;
-        // Final state immediately: borrador hidden, validado visible
-        gsap.set(borrador, { opacity: 0 });
-        gsap.set(validado, { opacity: 1, scale: 1, clearProps: "transform" });
+        // no-op: CSS inline style on [data-chip-from] (opacity:0) and
+        // default visibility on [data-chip-to] handle the correct final state.
       });
     },
     { scope: row3CardRef, dependencies: [] }
@@ -261,30 +281,41 @@ export default function Showcase() {
             ref={mapCardRef}
             className="flex-1 rounded-2xl border border-black/8 bg-white p-5 shadow-sm max-w-sm w-full"
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-0">
               {row2.mapNodes.map((node, i) => (
-                <div
-                  key={i}
-                  data-map-node
-                  className="flex items-center justify-between rounded-lg px-3 py-2"
-                  style={{ backgroundColor: `${getAreaColor(node.area)}14` }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: getAreaColor(node.area) }}
-                    />
-                    <span className="text-sm font-medium">{node.label}</span>
+                <>
+                  <div
+                    key={i}
+                    data-map-node
+                    className="flex items-center justify-between rounded-lg px-3 py-2"
+                    style={{ backgroundColor: `${getAreaColor(node.area)}14` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: getAreaColor(node.area) }}
+                      />
+                      <span className="text-sm font-medium">{node.label}</span>
+                    </div>
+                    {"badge" in node && node.badge && (
+                      <span
+                        data-map-badge
+                        className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"
+                      >
+                        {node.badge}
+                      </span>
+                    )}
                   </div>
-                  {"badge" in node && node.badge && (
-                    <span
-                      data-map-badge
-                      className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full"
-                    >
-                      {node.badge}
-                    </span>
+                  {/* Connector edge between nodes — visible by default, animated in full-motion */}
+                  {i < row2.mapNodes.length - 1 && (
+                    <div
+                      data-map-edge
+                      className="mx-4 h-2 w-px self-center"
+                      style={{ backgroundColor: "#CBD3CF", opacity: 0.5 }}
+                      aria-hidden="true"
+                    />
                   )}
-                </div>
+                </>
               ))}
             </div>
           </div>
@@ -318,10 +349,13 @@ export default function Showcase() {
               <p className="text-xs text-foreground/40 mt-0.5">{row3.item.meta}</p>
               {/* Status chips: both rendered, crossfade driven by GSAP */}
               <div className="flex items-center gap-2 mt-2">
-                {/* "from" chip — Borrador */}
+                {/* "from" chip — Borrador: animation-only element.
+                    Hidden by default (CSS) so no-JS / SSR / reduced-motion users
+                    never see it. GSAP reveals it in the full-motion branch only. */}
                 <span
                   data-chip-from
                   className="text-xs text-foreground/40"
+                  style={{ opacity: 0 }}
                 >
                   {row3.item.from}
                 </span>
