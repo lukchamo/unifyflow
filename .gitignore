@@ -1,0 +1,14 @@
+# OS junk
+.DS_Store
+.thumbnail
+*/.DS_Store
+
+# Logs
+*.log
+
+# SDD / dev scratch
+.superpowers/
+
+# Dependencies / build (the Next app has its own .gitignore too)
+node_modules/
+.next/
