@@ -11,14 +11,24 @@ import React from "react";
 import { useAppStore } from "@/lib/store/useAppStore";
 import { selectStatusText } from "@/lib/store/selectors";
 
-export function MapHeader() {
+export interface MapHeaderProps {
+  /** Override for the "Reorganizar con IA" button handler. Defaults to store reorganize(). */
+  onReorganize?: () => void;
+  /** Override for the "↺ Repetir" button handler. Defaults to store replay(). */
+  onReplay?: () => void;
+}
+
+export function MapHeader({ onReorganize, onReplay }: MapHeaderProps = {}) {
   const org = useAppStore((s) => s.org);
   const mapState = useAppStore((s) => s.mapState);
-  const replay = useAppStore((s) => s.replay);
-  const reorganize = useAppStore((s) => s.reorganize);
+  const storeReplay = useAppStore((s) => s.replay);
+  const storeReorganize = useAppStore((s) => s.reorganize);
   const statusText = useAppStore(selectStatusText);
 
   const { organized } = mapState;
+
+  const handleReplay = onReplay ?? storeReplay;
+  const handleReorganize = onReorganize ?? storeReorganize;
 
   return (
     <header
@@ -120,7 +130,7 @@ export function MapHeader() {
         {/* Repetir button */}
         <button
           type="button"
-          onClick={replay}
+          onClick={handleReplay}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -170,7 +180,7 @@ export function MapHeader() {
         ) : (
           <button
             type="button"
-            onClick={reorganize}
+            onClick={handleReorganize}
             style={{
               display: "inline-flex",
               alignItems: "center",

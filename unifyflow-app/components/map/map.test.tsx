@@ -89,4 +89,46 @@ describe("useMapData", () => {
     expect(labels).toContain("Elaborar presupuesto");
     expect(labels).toContain("Captar lead");
   });
+
+  it("all nodes have dimmed=false when filter is 'all'", () => {
+    seedStore();
+    // resetDemo sets filter to "all"
+    const { result } = renderHook(() => useMapData());
+    result.current.nodes.forEach((n) => {
+      expect(n.data.dimmed).toBe(false);
+    });
+  });
+
+  it("nodes with estado !== filter are dimmed when filter is active", () => {
+    seedStore();
+    const store = useAppStore.getState();
+    act(() => {
+      store.setFilter("validated");
+    });
+
+    const { result } = renderHook(() => useMapData());
+    result.current.nodes.forEach((n) => {
+      if (n.data.estado === "validated") {
+        expect(n.data.dimmed).toBe(false);
+      } else {
+        expect(n.data.dimmed).toBe(true);
+      }
+    });
+  });
+
+  it("nodes are not dimmed when filter is reset to 'all'", () => {
+    seedStore();
+    const store = useAppStore.getState();
+    act(() => {
+      store.setFilter("draft");
+    });
+    act(() => {
+      store.setFilter("all");
+    });
+
+    const { result } = renderHook(() => useMapData());
+    result.current.nodes.forEach((n) => {
+      expect(n.data.dimmed).toBe(false);
+    });
+  });
 });

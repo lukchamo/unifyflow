@@ -18,6 +18,7 @@ export function ProcessNode({ data, selected }: NodeProps<ProcessNodeType>) {
     inter,
     horas,
     notes,
+    dimmed,
   } = data;
 
   const style = NODE_STATE_STYLES[estado] ?? NODE_STATE_STYLES.draft;
@@ -36,6 +37,8 @@ export function ProcessNode({ data, selected }: NodeProps<ProcessNodeType>) {
     fontFamily: "inherit",
     cursor: "pointer",
     position: "relative",
+    opacity: dimmed ? 0.3 : 1,
+    transition: "opacity 200ms ease",
   };
 
   const dotStyle: React.CSSProperties = {

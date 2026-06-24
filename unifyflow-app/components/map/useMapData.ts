@@ -16,6 +16,8 @@ export interface ProcessNodeData extends Record<string, unknown> {
   horas: string | null;
   notes: number;
   selected: boolean;
+  /** True when a non-"all" filter is active and this node's estado doesn't match. */
+  dimmed: boolean;
 }
 
 /** Data carried in each React Flow edge. */
@@ -35,12 +37,15 @@ export function useMapData(): {
   const comments = useAppStore((s) => s.comments);
   const mapState = useAppStore((s) => s.mapState);
 
-  const { organized, selectedId } = mapState;
+  const { organized, selectedId, filter } = mapState;
 
   const nodes: ProcessFlowNode[] = useMemo(() => {
     return storeNodes.map((n) => {
       // Count comments for this node
       const notes = comments.filter((c) => c.nodeId === n.id).length;
+
+      // Dimmed when a non-"all" filter is active and this node's estado doesn't match
+      const dimmed = filter !== "all" && n.estado !== filter;
 
       return {
         id: n.id,
@@ -55,10 +60,11 @@ export function useMapData(): {
           horas: n.horas,
           notes,
           selected: n.id === selectedId,
+          dimmed,
         },
       };
     });
-  }, [storeNodes, comments, organized, selectedId]);
+  }, [storeNodes, comments, organized, selectedId, filter]);
 
   const edges: ProcessFlowEdge[] = useMemo(() => {
     const anySelected = selectedId !== null;
