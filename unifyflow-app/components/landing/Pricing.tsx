@@ -1,6 +1,10 @@
 import { PRICING } from "@/lib/data/content";
 
-export default function Pricing() {
+interface PricingProps {
+  onOpenModal?: () => void;
+}
+
+export default function Pricing({ onOpenModal }: PricingProps = {}) {
   return (
     <section
       id="precio"
@@ -89,6 +93,11 @@ export default function Pricing() {
                     : "border border-black/15 text-foreground/70 hover:border-black/25 hover:text-foreground"
                 }`}
                 style={plan.highlight ? { backgroundColor: "var(--accent)" } : {}}
+                onClick={
+                  (plan.highlight || plan.cta === "Empieza gratis") && onOpenModal
+                    ? onOpenModal
+                    : undefined
+                }
               >
                 {plan.cta}
               </button>

@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Nav from "@/components/landing/Nav";
 import Hero from "@/components/landing/Hero";
 import TrustStrip from "@/components/landing/TrustStrip";
@@ -12,9 +13,12 @@ import Preview from "@/components/landing/Preview";
 import Pricing from "@/components/landing/Pricing";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
+import QuickStartModal from "@/components/landing/QuickStartModal";
 
 export default function LandingPage() {
-  const handleOpenModal = () => console.log("open modal");
+  const [modalOpen, setModalOpen] = useState(false);
+  const handleOpenModal = () => setModalOpen(true);
+
   return (
     <>
       <Nav onOpenModal={handleOpenModal} />
@@ -28,10 +32,11 @@ export default function LandingPage() {
         <Differentiator />
         <Principles />
         <Preview />
-        <Pricing />
+        <Pricing onOpenModal={handleOpenModal} />
         <FinalCTA onOpenModal={handleOpenModal} />
       </main>
       <Footer />
+      <QuickStartModal open={modalOpen} onOpenChange={setModalOpen} />
     </>
   );
 }
