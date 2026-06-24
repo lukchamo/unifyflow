@@ -9,6 +9,7 @@
 
 import React from "react";
 import { useAppStore } from "@/lib/store/useAppStore";
+import { selectTotalHours } from "@/lib/store/selectors";
 
 // ── Dot color by estado ───────────────────────────────────────────────────────
 
@@ -123,6 +124,7 @@ export function DocumentSheet() {
   const nodes = useAppStore((s) => s.nodes);
   const opps = useAppStore((s) => s.opps);
   const interviews = useAppStore((s) => s.interviews);
+  const totalHours = useAppStore(selectTotalHours);
 
   const sortedOpps = [...opps].sort((a, b) => a.rank - b.rank);
 
@@ -342,7 +344,7 @@ export function DocumentSheet() {
                 lineHeight: 1.2,
               }}
             >
-              ≈ 18 h/semana
+              {`${totalHours}/semana`}
             </p>
           </div>
         </div>
