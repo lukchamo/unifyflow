@@ -33,15 +33,15 @@ const TIERS: Tier[] = [
   },
   {
     id: "tier-990",
-    label: "26–75 personas",
-    range: "26–75 personas",
+    label: "26 – 75 personas",
+    range: "26 – 75 personas",
     price: "€990",
     priceDisplay: "€990",
   },
   {
     id: "tier-1490",
-    label: "76–150 personas",
-    range: "76–150 personas",
+    label: "76 – 150 personas",
+    range: "76 – 150 personas",
     price: "€1.490",
     priceDisplay: "€1.490",
   },
@@ -162,7 +162,7 @@ export default function CheckoutPage() {
         <div className="space-y-3" role="radiogroup" aria-label="Plan de precio">
           {TIERS.map((tier, idx) => {
             const isSelected = tier.id === selectedTierId;
-            const isHighlighted = idx === 0; // middle/most relevant highlighted
+            const isHighlighted = idx === 0; // first tier (€490) is the default / most common
 
             return (
               <button
