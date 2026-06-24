@@ -334,6 +334,8 @@ export function NodeDetailPanel() {
             "bottom-0 left-0 right-0 rounded-t-2xl max-h-[85vh]",
             // Desktop: right-side panel
             "md:bottom-auto md:top-4 md:right-4 md:left-auto md:rounded-2xl md:h-[calc(100vh-2rem)]",
+            // Entry animation — zeroed by globals.css reduced-motion block
+            "data-[state=open]:motion-safe:animate-[uf-rise_0.35s_ease-out]",
           ].join(" ")}
           style={{
             width: undefined,

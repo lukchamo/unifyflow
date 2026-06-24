@@ -23,7 +23,7 @@ export default function Differentiator() {
               style={
                 row.highlight
                   ? { backgroundColor: "var(--accent-tint)" }
-                  : { backgroundColor: "white" }
+                  : { backgroundColor: "var(--background, #FFFFFF)" }
               }
             >
               <div className="sm:w-40 flex-shrink-0">

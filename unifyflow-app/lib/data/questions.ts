@@ -16,7 +16,7 @@ const banks: Record<string, AreaBank> = {
     "Hola, {nombre}. Para empezar, cuéntame: ¿qué haces tú cuando entra un pedido nuevo de un cliente?",
     "¿A quién le pasas ese pedido cuando ya lo tienes listo, y cómo se lo haces llegar?",
     "¿Qué parte del proceso te quita más tiempo o te toca rehacer a mano?",
-    "¿Hay algo que te frene para cerrar un pedido más rápido de lo que quisiera?",
+    "¿Hay algo que te frene para cerrar un pedido más rápido de lo que quisieras?",
   ],
   Comercial: [
     "Hola, {nombre}. Cuéntame un poco: ¿cómo arranca tu día cuando tienes que darle seguimiento a un cliente?",
@@ -53,9 +53,10 @@ const defaultBank: AreaBank = [
 
 export function getQuestions(member: QuestionMember): Question[] {
   const bank: AreaBank = banks[member.area] ?? defaultBank;
+  const firstName = member.nombre.split(" ")[0];
   return bank.map((text, i) => ({
     id: `${member.area}-q${i + 1}`,
-    text: text.replace("{nombre}", member.nombre),
+    text: text.replace("{nombre}", firstName),
   }));
 }
 

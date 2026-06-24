@@ -64,6 +64,7 @@ export const ProcessNodeSchema = z.object({
   sourceInterviewIds: z.array(z.string()),
   desc: z.string(),
   steps: z.array(z.string()),
+  taggedBy: z.string().optional(),
 });
 export type ProcessNode = z.infer<typeof ProcessNodeSchema>;
 

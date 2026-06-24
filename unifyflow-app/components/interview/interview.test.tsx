@@ -70,9 +70,9 @@ describe("InterviewScreen — start", () => {
       screen.getByRole("button", { name: /Empezar la entrevista/i })
     );
     // First question for Operaciones area (member Andrés Pérez)
-    // The question bank replaces {nombre} with the full name "Andrés Pérez"
+    // The question bank replaces {nombre} with only the first name "Andrés"
     expect(
-      screen.getByText(/Hola, Andrés Pérez\. Para empezar/)
+      screen.getByText(/Hola, Andrés\. Para empezar/)
     ).toBeInTheDocument();
   });
 });

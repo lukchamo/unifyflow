@@ -84,12 +84,9 @@ export function GuidedTour() {
           "bg-white dark:bg-neutral-900",
           "shadow-2xl",
           "p-5",
+          "guided-tour-card",
           "motion-safe:animate-[fadeSlideUp_200ms_ease-out_both]",
         ].join(" ")}
-        style={{
-          // Inline fallback for environments without Tailwind animation utility
-          animation: "fadeSlideUp 200ms ease-out both",
-        }}
       >
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -172,7 +169,7 @@ export function GuidedTour() {
           to   { opacity: 1; transform: translateY(0); }
         }
         @media (prefers-reduced-motion: reduce) {
-          [role="dialog"] { animation: none !important; }
+          .guided-tour-card { animation: none !important; }
         }
       `}</style>
     </>

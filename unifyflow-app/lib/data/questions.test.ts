@@ -47,6 +47,24 @@ describe("getQuestions", () => {
     expect(qs[0].text).toContain("Test");
   });
 
+  it("Q1 uses only the first name for Compras (full name splits)", () => {
+    const qs = getQuestions({ nombre: "Miguel Rodríguez", cargo: "Analista", area: "Compras" });
+    expect(qs[0].text).toContain("Miguel");
+    expect(qs[0].text).not.toContain("Miguel Rodríguez");
+  });
+
+  it("Q1 uses only the first name for Finanzas (full name splits)", () => {
+    const qs = getQuestions({ nombre: "Sofía López", cargo: "Contadora", area: "Finanzas" });
+    expect(qs[0].text).toContain("Sofía");
+    expect(qs[0].text).not.toContain("Sofía López");
+  });
+
+  it("Q1 uses only the first name for Atención (full name splits)", () => {
+    const qs = getQuestions({ nombre: "Carlos Pérez", cargo: "Agente", area: "Atención" });
+    expect(qs[0].text).toContain("Carlos");
+    expect(qs[0].text).not.toContain("Carlos Pérez");
+  });
+
   it("all questions have non-empty text", () => {
     const areas = ["Operaciones", "Comercial", "Compras", "Finanzas", "Atención", "Desconocida"];
     for (const area of areas) {
