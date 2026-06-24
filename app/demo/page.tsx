@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { RoleCard } from "@/components/demo/RoleCard";
 import { Button } from "@/components/ui/Button";
 import { useAppStore } from "@/lib/store/useAppStore";
@@ -127,13 +128,13 @@ export default function DemoPage() {
               Demo reiniciada
             </p>
           )}
-          <a
+          <Link
             href="/"
             className="text-sm transition-colors hover:underline"
             style={{ color: "var(--accent-dk)" }}
           >
             ← Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     </main>

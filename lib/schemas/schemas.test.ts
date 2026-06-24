@@ -24,11 +24,11 @@ describe("schemas", () => {
   });
 
   it("rejects bad estado", () => {
-    expect(() => ProcessNodeSchema.parse({ estado: "nope" } as any)).toThrow();
+    expect(() => ProcessNodeSchema.parse({ estado: "nope" } as unknown)).toThrow();
   });
 
   it("rejects bad role", () => {
-    expect(() => MemberSchema.parse({ rol: "ceo" } as any)).toThrow();
+    expect(() => MemberSchema.parse({ rol: "ceo" } as unknown)).toThrow();
   });
 
   // Extra tests
