@@ -57,6 +57,33 @@ body {
   }
 }
 
+/* ── Print utility ──────────────────────────────────────────────────── */
+.no-print {
+  /* intentionally empty — display reset happens only in print below */
+}
+
+@media print {
+  /* Preserve colors and backgrounds exactly */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide chrome that should not appear in the PDF */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Remove the step gray background; let the sheet fill the page */
+  .radiography-step {
+    background-color: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
