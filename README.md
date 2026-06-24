@@ -4,34 +4,24 @@
 
 UnifyFlow reconstruye cómo trabaja una organización *de verdad* —a partir de micro‑entrevistas con IA— y la dibuja como un **mapa de procesos vivo**, validado por las personas que lo habitan. Sobre esa claridad, prioriza **dónde aplicar IA primero**. El entregable es la *Radiografía de Procesos + IA*.
 
-Este repositorio contiene el **PRD**, el **prototipo** original y una **demo funcional en Next.js 16** que recorre el flujo completo con datos de ejemplo.
+Este repositorio es la **demo funcional en Next.js 16** que recorre el flujo completo con datos de ejemplo. La documentación del producto (PRD, prototipo, diseño técnico) vive en [`docs/`](docs/).
 
-## Estructura
+## Stack
 
-| Ruta | Qué es |
-|---|---|
-| `unifyflow-prd.md` | Product Requirements Document |
-| `prototipo/` | Prototipo HTML original + screenshots |
-| `unifyflow-app/` | **App Next.js 16** (la demo funcional) |
-| `docs/superpowers/` | Spec de diseño técnico + plan de implementación |
-
-## La demo (`unifyflow-app/`)
-
-Stack: **Next.js 16 · React 19 · TypeScript · Tailwind 4 · Radix UI · React Flow · GSAP · Zustand · Zod · Vitest**.
+**Next.js 16 · React 19 · TypeScript · Tailwind 4 · Radix UI · React Flow · GSAP · Zustand · Zod · Vitest.**
 
 Todo funciona con **datos mock** — sin backend, sin claves, sin red. Auth, el agente de IA, Stripe y el "tiempo real" están simulados; un único store (Zustand, persistido en `localStorage`) es la fuente de verdad.
 
-### Arrancar
+## Arrancar
 
 ```bash
-cd unifyflow-app
 npm install
 npm run dev        # http://localhost:3000
 ```
 
-Otros scripts: `npm test` · `npm run build` · `npm run typecheck`.
+Otros scripts: `npm test` (314 tests) · `npm run build` · `npm run typecheck`.
 
-### El recorrido
+## El recorrido
 
 - `/` — Landing animada (GSAP), mobile‑first.
 - `/demo` — "Entrar como…": Admin · Champion, Validador o Entrevistado.
@@ -39,6 +29,15 @@ Otros scripts: `npm test` · `npm run build` · `npm run typecheck`.
 - `/e/[slug]` — La micro‑entrevista del colaborador (al completarla, el nodo aparece en el mapa).
 - `/yo/procesos`, `/yo/notificaciones` — Vista del colaborador.
 - `/checkout` — Pago simulado que desbloquea las oportunidades.
+
+## Estructura
+
+```
+app/            Rutas Next.js (App Router)
+components/     UI: landing/, app-shell/, steps/, map/, interview/, ui/, demo/
+lib/            data/ (mock + content) · schemas/ (Zod) · services/ · store/ (Zustand) · theme/ · animation/
+docs/           PRD, prototipo original, spec de diseño y plan de implementación
+```
 
 ---
 
