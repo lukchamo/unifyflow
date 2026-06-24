@@ -5,7 +5,6 @@
  */
 import "@xyflow/react/dist/style.css";
 import React, { useCallback } from "react";
-import dynamic from "next/dynamic";
 import {
   ReactFlow,
   Background,
@@ -67,17 +66,5 @@ function ProcessFlowInner() {
 export function ProcessFlow() {
   return <ProcessFlowInner />;
 }
-
-/**
- * ProcessFlowDynamic — next/dynamic wrapper for SSR-safe import in pages.
- *
- * Usage in a page/layout:
- *   import { ProcessFlowDynamic } from "@/components/map/ProcessFlow";
- *   // Then render: <ProcessFlowDynamic />
- */
-export const ProcessFlowDynamic = dynamic(
-  () => Promise.resolve(ProcessFlow),
-  { ssr: false }
-);
 
 export default ProcessFlow;
