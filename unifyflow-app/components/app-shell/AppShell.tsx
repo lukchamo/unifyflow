@@ -56,7 +56,6 @@ export function AppShell({ children }: AppShellProps) {
           height: "52px",
           background: "#FFFFFF",
           borderBottom: "1px solid #E7EAE8",
-          display: "flex",
           alignItems: "center",
           padding: "0 16px",
           gap: "12px",
@@ -82,14 +81,8 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       {/* Main content area */}
-      <main
-        style={{
-          flex: 1,
-          // On mobile, add top padding to account for fixed top bar
-          paddingTop: "0",
-        }}
-        className="md:pt-0 pt-[52px]"
-      >
+      {/* On mobile, pt-[52px] offsets the fixed top bar; md:pt-0 removes it on desktop */}
+      <main style={{ flex: 1 }} className="md:pt-0 pt-[52px]">
         {children}
       </main>
     </div>
