@@ -9,6 +9,7 @@ export default function Hero({ onOpenModal }: { onOpenModal: () => void }) {
       <div className="mx-auto max-w-[1120px] flex flex-col lg:flex-row items-center gap-12">
         <div className="flex-1 flex flex-col gap-6">
           <span
+            data-hero-enter
             className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-[family-name:var(--font-mono)] uppercase tracking-wider"
             style={{
               backgroundColor: "var(--accent-tint)",
@@ -17,10 +18,16 @@ export default function Hero({ onOpenModal }: { onOpenModal: () => void }) {
           >
             {HERO.badge}
           </span>
-          <h1 className="font-[family-name:var(--font-newsreader)] text-4xl sm:text-5xl lg:text-[54px] leading-tight text-foreground">
+          <h1
+            data-hero-enter
+            className="font-[family-name:var(--font-newsreader)] text-4xl sm:text-5xl lg:text-[54px] leading-tight text-foreground"
+          >
             {HERO.h1}
           </h1>
-          <p className="text-lg text-foreground/70 leading-relaxed max-w-lg">
+          <p
+            data-hero-enter
+            className="text-lg text-foreground/70 leading-relaxed max-w-lg"
+          >
             {parts[0]}
             <em>{HERO.emphasis}</em>
             {parts[1]}
@@ -51,7 +58,10 @@ export default function Hero({ onOpenModal }: { onOpenModal: () => void }) {
             ))}
           </div>
         </div>
-        <div className="flex-1 flex justify-center lg:justify-end">
+        <div
+          data-hero-enter
+          className="flex-1 flex justify-center lg:justify-end"
+        >
           <HeroMap />
         </div>
       </div>

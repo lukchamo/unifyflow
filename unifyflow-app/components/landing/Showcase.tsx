@@ -14,7 +14,7 @@
  * (validated/complete) state immediately.
  */
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -283,9 +283,8 @@ export default function Showcase() {
           >
             <div className="flex flex-col gap-0">
               {row2.mapNodes.map((node, i) => (
-                <>
+                <Fragment key={i}>
                   <div
-                    key={i}
                     data-map-node
                     className="flex items-center justify-between rounded-lg px-3 py-2"
                     style={{ backgroundColor: `${getAreaColor(node.area)}14` }}
@@ -315,7 +314,7 @@ export default function Showcase() {
                       aria-hidden="true"
                     />
                   )}
-                </>
+                </Fragment>
               ))}
             </div>
           </div>
