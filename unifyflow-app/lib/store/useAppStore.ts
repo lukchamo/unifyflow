@@ -65,6 +65,7 @@ function buildSeed() {
     mapState: {
       organized: false,
       revealed: false,
+      edgesVisible: false,
       filter: "all",
       selectedId: null as string | null,
     },
@@ -93,6 +94,8 @@ interface AppActions {
   // Map state
   reorganize: () => void;
   replay: () => void;
+  setRevealed: (b: boolean) => void;
+  setEdgesVisible: (b: boolean) => void;
 
   // Opportunities
   detectOpportunities: () => void;
@@ -249,8 +252,21 @@ export const useAppStore = create<AppState>()(
             ...s.mapState,
             organized: false,
             revealed: false,
+            edgesVisible: false,
             selectedId: null,
           },
+        }));
+      },
+
+      setRevealed: (b: boolean) => {
+        set((s) => ({
+          mapState: { ...s.mapState, revealed: b },
+        }));
+      },
+
+      setEdgesVisible: (b: boolean) => {
+        set((s) => ({
+          mapState: { ...s.mapState, edgesVisible: b },
         }));
       },
 
