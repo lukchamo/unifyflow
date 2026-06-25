@@ -17,6 +17,7 @@
 import { useState, useCallback } from "react";
 import { getQuestions } from "@/lib/data/questions";
 import { useAppStore } from "@/lib/store/useAppStore";
+import { useAuth } from "@/components/auth/AuthProvider";
 import type { Answer } from "@/lib/schemas";
 
 // ── Member constants for Andrés Pérez (m4) ────────────────────────────────────
@@ -52,10 +53,17 @@ export interface UseInterviewReturn {
 export function useInterview(): UseInterviewReturn {
   const submitInterview = useAppStore((s) => s.submitInterview);
   const team = useAppStore((s) => s.team);
+  const { mode, memberId: authMemberId } = useAuth();
+
+  // In firebase mode the interview is submitted by the signed-in member (so it
+  // satisfies the per-member Firestore security rule). In mock mode (and tests)
+  // it stays the fixed demo member m4.
+  const memberId =
+    mode === "firebase" && authMemberId ? authMemberId : MEMBER_ID;
 
   // Resolve member from store; fall back to constants if not found
-  const member = team.find((m) => m.id === MEMBER_ID) ?? {
-    id: MEMBER_ID,
+  const member = team.find((m) => m.id === memberId) ?? {
+    id: memberId,
     nombre: MEMBER_NOMBRE,
     cargo: MEMBER_CARGO,
     area: MEMBER_AREA,
@@ -96,13 +104,13 @@ export function useInterview(): UseInterviewReturn {
       if (isLast) {
         // All questions answered — build Answer[] and call store
         const storeAnswers: Answer[] = newAnswers.map((a, i) => ({
-          id: `a-m4-${i + 1}-${Date.now()}`,
-          interviewId: `i-m4-interview`,
+          id: `a-${member.id}-${i + 1}-${Date.now()}`,
+          interviewId: `i-${member.id}-interview`,
           pregunta: a.pregunta,
           respuesta: a.respuesta,
           modalidad: "texto" as const,
         }));
-        submitInterview(MEMBER_ID, storeAnswers);
+        submitInterview(member.id, storeAnswers);
         setPhase("thanks");
       } else {
         // Show typing indicator briefly, then advance to next question
@@ -113,7 +121,7 @@ export function useInterview(): UseInterviewReturn {
         }, TYPING_DELAY);
       }
     },
-    [answers, currentIndex, questions, submitInterview]
+    [answers, currentIndex, questions, submitInterview, member.id]
   );
 
   return {

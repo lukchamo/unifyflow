@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { newsreader, plexSans, plexMono } from "./fonts";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export const metadata: Metadata = {
   title: "UnifyFlow",
@@ -17,7 +18,9 @@ export default function RootLayout({
       lang="es"
       className={`${newsreader.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

@@ -35,10 +35,31 @@ import {
 } from "@/lib/services/agent";
 import { realtime } from "@/lib/services/realtime";
 import type { PaletteName } from "@/lib/theme/palettes";
+import { USE_FIREBASE } from "@/lib/firebase/config";
+import * as fb from "@/lib/firebase/repo";
 
 // ── NavStep ───────────────────────────────────────────────────────────────────
 
 export type NavStep = "equipo" | "entrevista" | "mapa" | "oportunidades" | "radiografia";
+
+// ── createProcess input ─────────────────────────────────────────────────────
+
+export interface CreateProcessInput {
+  label: string;
+  area: string;
+  desc: string;
+  ownerMemberId: string;
+  steps?: string[];
+}
+
+// Per-area base coordinates for placing a newly-created node on the map.
+const AREA_POS: Record<string, { a: { x: number; y: number }; b: { x: number; y: number } }> = {
+  Comercial: { a: { x: 70, y: 36 }, b: { x: 16, y: 56 } },
+  Compras: { a: { x: 360, y: 56 }, b: { x: 238, y: 126 } },
+  Operaciones: { a: { x: 430, y: 280 }, b: { x: 452, y: 206 } },
+  Finanzas: { a: { x: 700, y: 140 }, b: { x: 668, y: 206 } },
+  Atención: { a: { x: 900, y: 80 }, b: { x: 884, y: 206 } },
+};
 
 // ── Seed builder ──────────────────────────────────────────────────────────────
 
@@ -86,6 +107,9 @@ interface AppActions {
   inviteMember: (email: string) => void;
   submitInterview: (memberId: string, answers: Answer[]) => void;
 
+  // Process authoring (admin creates a process directly, no interview)
+  createProcess: (input: CreateProcessInput) => void;
+
   // Node management
   validateNode: (id: string, validatorId: string) => void;
   addComment: (nodeId: string, text: string) => void;
@@ -118,6 +142,10 @@ interface AppActions {
 
   // Demo
   resetDemo: () => void;
+
+  // Firebase sync — merge a partial of server-sourced data into the store.
+  // Used by FirebaseBridge to stream Firestore snapshots into state.
+  hydrate: (partial: Partial<Seed>) => void;
 }
 
 export type AppState = Seed & AppActions;
@@ -132,6 +160,11 @@ export const useAppStore = create<AppState>()(
       // ── Member management ──────────────────────────────────────────────────
 
       inviteMember: (email: string) => {
+        if (USE_FIREBASE) {
+          // Firestore is the source of truth; the members listener will add it.
+          void fb.inviteMember(get().org.id, email).catch(console.error);
+          return;
+        }
         const newMember: Member = {
           id: `m-invite-${Date.now()}`,
           orgId: "o1",
@@ -149,6 +182,17 @@ export const useAppStore = create<AppState>()(
         const state = get();
         const member = state.team.find((m) => m.id === memberId);
         if (!member) return;
+
+        if (USE_FIREBASE) {
+          // Persist the interview only; the `onInterviewWritten` Cloud Function
+          // assembles the node server-side and the nodes listener streams it
+          // back (FirebaseBridge re-emits "interview:completed" for the map).
+          const existing = state.interviews.find((i) => i.memberId === memberId);
+          void fb
+            .submitInterview(member, answers, existing?.id)
+            .catch(console.error);
+          return;
+        }
 
         // Find or create interview
         let interview = state.interviews.find((i) => i.memberId === memberId);
@@ -189,9 +233,49 @@ export const useAppStore = create<AppState>()(
         realtime.emit("interview:completed", { node, log });
       },
 
+      // ── Process authoring ──────────────────────────────────────────────────
+
+      createProcess: (input: CreateProcessInput) => {
+        const { org } = get();
+        const id = `node-new-${Date.now()}`;
+        const base = AREA_POS[input.area] ?? {
+          a: { x: 200, y: 200 },
+          b: { x: 120, y: 200 },
+        };
+        const node: ProcessNode = {
+          id,
+          orgId: org.id,
+          label: input.label,
+          area: input.area,
+          ownerMemberId: input.ownerMemberId,
+          estado: "draft",
+          posA: { x: base.a.x + 110, y: base.a.y + 70 },
+          posB: { x: base.b.x + 110, y: base.b.y + 70 },
+          horas: null,
+          inter: false,
+          sourceInterviewIds: [],
+          desc: input.desc,
+          steps:
+            input.steps && input.steps.length > 0
+              ? input.steps
+              : ["Identificar necesidad", "Documentar proceso", "Validar con el equipo"],
+        };
+
+        if (USE_FIREBASE) {
+          void fb.createProcess(node).catch(console.error);
+          return;
+        }
+        set((s) => ({ nodes: [...s.nodes, node] }));
+        realtime.emit("interview:completed", { node });
+      },
+
       // ── Node management ────────────────────────────────────────────────────
 
       validateNode: (id: string, validatorId: string) => {
+        if (USE_FIREBASE) {
+          void fb.validateNode(id, validatorId).catch(console.error);
+          return;
+        }
         const validation: Validation = {
           id: `val-${id}-${validatorId}-${Date.now()}`,
           nodeId: id,
@@ -208,6 +292,10 @@ export const useAppStore = create<AppState>()(
       },
 
       addComment: (nodeId: string, text: string) => {
+        if (USE_FIREBASE) {
+          void fb.addComment(nodeId, text).catch(console.error);
+          return;
+        }
         const comment: Comment = {
           id: `c-${Date.now()}`,
           nodeId,
@@ -219,6 +307,10 @@ export const useAppStore = create<AppState>()(
       },
 
       tagForValidation: (nodeId: string, memberId: string) => {
+        if (USE_FIREBASE) {
+          void fb.tagForValidation(nodeId, memberId).catch(console.error);
+          return;
+        }
         const log = makeLog(
           "tagForValidation",
           `nodeId:${nodeId} memberId:${memberId}`,
@@ -233,6 +325,10 @@ export const useAppStore = create<AppState>()(
       },
 
       addStep: (nodeId: string, step: string) => {
+        if (USE_FIREBASE) {
+          void fb.addStep(nodeId, step).catch(console.error);
+          return;
+        }
         set((s) => ({
           nodes: s.nodes.map((n) =>
             n.id === nodeId ? { ...n, steps: [...n.steps, step] } : n
@@ -275,6 +371,11 @@ export const useAppStore = create<AppState>()(
       // ── Opportunities ──────────────────────────────────────────────────────
 
       detectOpportunities: () => {
+        if (USE_FIREBASE) {
+          // Opportunities are seeded in Firestore and streamed via the listener;
+          // nothing to recompute client-side in firebase mode.
+          return;
+        }
         const { nodes, opps } = get();
         const lockedIds = new Set(
           opps.filter((o) => o.locked).map((o) => o.nodeId)
@@ -290,6 +391,13 @@ export const useAppStore = create<AppState>()(
       // ── Subscription ───────────────────────────────────────────────────────
 
       pay: () => {
+        if (USE_FIREBASE) {
+          const { org, subscription, opps } = get();
+          void fb
+            .pay(org.id, subscription.id, opps)
+            .catch(console.error);
+          return;
+        }
         set((s) => ({
           subscription: { ...s.subscription, paid: true },
           opps: s.opps.map((op) => ({ ...op, locked: false })),
@@ -339,7 +447,25 @@ export const useAppStore = create<AppState>()(
       // ── Demo reset ─────────────────────────────────────────────────────────
 
       resetDemo: () => {
+        if (USE_FIREBASE) {
+          // Don't clobber Firestore-sourced data with the mock seed; just reset
+          // the local UI state. Re-seed the backend with `npm run seed`.
+          const fresh = buildSeed();
+          set({
+            theme: fresh.theme,
+            currentStep: fresh.currentStep,
+            mapState: fresh.mapState,
+            tour: fresh.tour,
+          });
+          return;
+        }
         set(buildSeed());
+      },
+
+      // ── Firebase hydration ─────────────────────────────────────────────────
+
+      hydrate: (partial) => {
+        set(partial as Partial<AppState>);
       },
     }),
     {

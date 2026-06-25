@@ -8,10 +8,20 @@ import { RoleCard } from "@/components/demo/RoleCard";
 import { Button } from "@/components/ui/Button";
 import { useAppStore } from "@/lib/store/useAppStore";
 import { signInAs } from "@/lib/services/auth";
+import { useAuth } from "@/components/auth/AuthProvider";
+
+// Seeded demo accounts (see scripts/seed.ts) used in firebase mode.
+const DEMO_PASSWORD = "unifyflow123";
+const DEMO_EMAIL = {
+  admin: "marta-ruiz@robledo.es",
+  validador: "lucia-vidal@robledo.es",
+  entrevistado: "andres-perez@robledo.es",
+} as const;
 
 export default function DemoPage() {
   const router = useRouter();
   const { setRole, resetDemo } = useAppStore();
+  const { mode, signInEmail } = useAuth();
   const [resetConfirmed, setResetConfirmed] = useState(false);
 
   function handleReset() {
@@ -20,38 +30,44 @@ export default function DemoPage() {
     setTimeout(() => setResetConfirmed(false), 3000);
   }
 
+  // In firebase mode, really authenticate as the seeded account (role comes
+  // from custom claims). In mock mode, keep the original store-based role.
+  function enter(
+    role: "admin" | "validador" | "entrevistado",
+    destination: string
+  ) {
+    if (mode === "firebase") {
+      void signInEmail(DEMO_EMAIL[role], DEMO_PASSWORD)
+        .then(() => router.push(destination))
+        .catch((e) => console.error("demo sign-in failed", e));
+      return;
+    }
+    signInAs(role);
+    setRole(role);
+    router.push(destination);
+  }
+
   const roles = [
     {
       icon: "🏗️",
       title: "Admin · Champion",
       description:
         "Crea la org, invita al equipo, ve el mapa, desbloquea las oportunidades y exporta la radiografía.",
-      onEnter: () => {
-        signInAs("admin");
-        setRole("admin");
-        router.push("/app");
-      },
+      onEnter: () => enter("admin", "/app"),
     },
     {
       icon: "✅",
       title: "Validador",
       description: "Confirma y corrige el mapa de tu área. Comenta y valida.",
-      onEnter: () => {
-        signInAs("validador");
-        setRole("validador");
-        router.push("/app?role=validador&step=mapa");
-      },
+      onEnter: () => enter("validador", "/app?role=validador&step=mapa"),
     },
     {
       icon: "🎤",
       title: "Entrevistado",
       description:
         "Responde 3–4 preguntas en menos de 5 minutos. Tu respuesta dibuja el mapa.",
-      onEnter: () => {
-        signInAs("entrevistado");
-        setRole("entrevistado");
-        router.push("/e/distribuciones-robledo-3f9a");
-      },
+      onEnter: () =>
+        enter("entrevistado", "/e/distribuciones-robledo-3f9a"),
     },
   ];
 

@@ -9,17 +9,30 @@ Este repositorio es la **demo funcional en Next.js 16** que recorre el flujo com
 ## Stack
 
 **Next.js 16 · React 19 · TypeScript · Tailwind 4 · Radix UI · React Flow · GSAP · Zustand · Zod · Vitest.**
+Backend opcional: **Firebase Auth + Firestore + Cloud Functions (triggers)**, con **Firebase Emulator**.
 
-Todo funciona con **datos mock** — sin backend, sin claves, sin red. Auth, el agente de IA, Stripe y el "tiempo real" están simulados; un único store (Zustand, persistido en `localStorage`) es la fuente de verdad.
+Dos backends de datos, seleccionables con `NEXT_PUBLIC_DATA_BACKEND`:
+
+- **`mock`** (por defecto sin configuración) — todo simulado, sin red; un store Zustand (`localStorage`) es la fuente de verdad. Es lo que despliega Vercel.
+- **`firebase`** — Auth real (email + Google), Firestore en todo el ciclo, **roles por custom claims** y triggers que ensamblan el mapa en el servidor.
 
 ## Arrancar
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+
+# Demo mock (sin backend):
+npm run dev          # http://localhost:3000
+
+# Stack Firebase completo (emulador + seed + dev, un solo comando):
+npm run firebase     # requiere JDK 17+ para el emulador de Firestore
 ```
 
-Otros scripts: `npm test` (314 tests) · `npm run build` · `npm run typecheck`.
+Con Firebase: entra en **/login** o **/demo** con las cuentas demo (contraseña `unifyflow123`):
+`marta-ruiz@robledo.es` (admin) · `lucia-vidal@robledo.es` (validador) · `andres-perez@robledo.es` (entrevistado).
+Emulator UI en <http://localhost:4000>. **Guía completa: [`docs/FIREBASE.md`](docs/FIREBASE.md).**
+
+Otros scripts: `npm test` (314 tests) · `npm run build` · `npm run typecheck` · `npm run dev:mock` · `npm run seed`.
 
 ## El recorrido
 
@@ -33,10 +46,13 @@ Otros scripts: `npm test` (314 tests) · `npm run build` · `npm run typecheck`.
 ## Estructura
 
 ```
-app/            Rutas Next.js (App Router)
-components/     UI: landing/, app-shell/, steps/, map/, interview/, ui/, demo/
-lib/            data/ (mock + content) · schemas/ (Zod) · services/ · store/ (Zustand) · theme/ · animation/
-docs/           PRD, prototipo original, spec de diseño y plan de implementación
+app/            Rutas Next.js (App Router) — incluye /login y /demo
+components/     UI: landing/, app-shell/, steps/, map/, interview/, ui/, demo/, auth/, firebase/
+lib/            data/ · schemas/ (Zod) · services/ · store/ (Zustand) · firebase/ (client, admin, auth, repo) · theme/ · animation/
+functions/      Cloud Functions — triggers de Firestore (ensamblado de nodos, claims de rol)
+scripts/        run.sh (emulador/live), seed.ts, smoke.ts
+docs/           PRD, prototipo, spec, plan y FIREBASE.md
+firebase.json · firestore.rules · firestore.indexes.json · .firebaserc · .env.example
 ```
 
 ---
