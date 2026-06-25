@@ -26,10 +26,14 @@ export function OpportunitiesStep() {
           grid-template-columns: minmax(0, 1fr) 268px;
           gap: 32px;
           align-items: flex-start;
+          min-height: 100%;
+          padding: 40px 32px;
+          box-sizing: border-box;
         }
         @media (max-width: 768px) {
           .opportunities-step {
             grid-template-columns: 1fr;
+            padding: 24px 16px;
           }
         }
       `}</style>

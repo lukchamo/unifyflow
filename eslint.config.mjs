@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Product docs & the original HTML prototype (generated runtime JS) — not app code.
     "docs/**",
+    // Cloud Functions have their own toolchain (CommonJS, own tsconfig); the
+    // compiled lib/ output and src/ are linted via `npm --prefix functions run lint`.
+    "functions/**",
   ]),
 ]);
 

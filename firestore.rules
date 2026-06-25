@@ -1,0 +1,122 @@
+rules_version = '2';
+
+// UnifyFlow Firestore security rules — role-based access control.
+//
+// Roles live in the user's custom claims (set by the `onMemberWritten` Cloud
+// Function trigger): `role` ∈ {admin, validador, entrevistado} and `orgId`.
+// Cloud Functions use the Admin SDK and bypass these rules, so server-side
+// assembly (interview → node) is always allowed regardless of what's below.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    // Null-safe claim reads: a missing custom claim must evaluate to '' rather
+    // than throw "Property X is undefined on object" (which would crash the
+    // whole listener/query instead of just denying).
+    function role() {
+      return isSignedIn() ? request.auth.token.get('role', '') : '';
+    }
+    function userOrg() {
+      return isSignedIn() ? request.auth.token.get('orgId', '') : '';
+    }
+    function userMemberId() {
+      return isSignedIn() ? request.auth.token.get('memberId', '') : '';
+    }
+    function isAdmin() {
+      return role() == 'admin';
+    }
+    function isValidador() {
+      return role() == 'validador';
+    }
+    // The doc belongs to the caller's org (works for create via request, and
+    // read/update/delete via the stored resource).
+    function inMyOrg(orgId) {
+      return isSignedIn() && orgId == userOrg();
+    }
+
+    // ── users (uid → member link) ────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if false; // only server (Admin SDK)
+    }
+
+    // ── organizations ────────────────────────────────────────────────────────
+    match /organizations/{orgId} {
+      allow read: if inMyOrg(orgId);
+      allow create, update, delete: if isAdmin() && orgId == userOrg();
+    }
+
+    // ── members ──────────────────────────────────────────────────────────────
+    match /members/{memberId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      // Admin manages the team; a member may update their own profile fields.
+      allow create: if isAdmin() && inMyOrg(request.resource.data.orgId);
+      allow update: if isAdmin() && inMyOrg(resource.data.orgId)
+                    || (inMyOrg(resource.data.orgId) && memberId == userMemberId());
+      allow delete: if isAdmin() && inMyOrg(resource.data.orgId);
+    }
+
+    // ── interviews ───────────────────────────────────────────────────────────
+    // Interviews carry a denormalized orgId, so reads are org-scoped like every
+    // other collection (no dependency on the memberId claim for listing).
+    match /interviews/{interviewId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      // The interviewee submits their own interview; admin may seed/edit.
+      allow create, update: if isSignedIn() && (isAdmin()
+                  || request.resource.data.memberId == userMemberId());
+      allow delete: if isAdmin();
+    }
+
+    // ── nodes (process map) ──────────────────────────────────────────────────
+    // Mostly written by the `onInterviewWritten` trigger (Admin SDK). Clients
+    // read within their org; admins + validadores may update (validate, steps).
+    match /nodes/{nodeId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      allow create: if isAdmin() && inMyOrg(request.resource.data.orgId);
+      allow update: if inMyOrg(resource.data.orgId) && (isAdmin() || isValidador());
+      allow delete: if isAdmin() && inMyOrg(resource.data.orgId);
+    }
+
+    // ── edges (handoffs) ─────────────────────────────────────────────────────
+    match /edges/{edgeId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      allow write: if isAdmin() && inMyOrg(request.resource.data.orgId);
+    }
+
+    // ── opportunities ────────────────────────────────────────────────────────
+    match /opportunities/{oppId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      allow write: if isAdmin() && inMyOrg(request.resource.data.orgId);
+    }
+
+    // ── validations ──────────────────────────────────────────────────────────
+    match /validations/{validationId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (isAdmin() || isValidador());
+      allow update, delete: if isAdmin();
+    }
+
+    // ── comments ─────────────────────────────────────────────────────────────
+    match /comments/{commentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── agentLogs (provenance / audit) ───────────────────────────────────────
+    match /agentLogs/{logId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      allow write: if false; // only server (Admin SDK / triggers)
+    }
+
+    // ── subscriptions ────────────────────────────────────────────────────────
+    match /subscriptions/{subId} {
+      allow read: if inMyOrg(resource.data.orgId);
+      allow write: if isAdmin() && inMyOrg(request.resource.data.orgId);
+    }
+  }
+}

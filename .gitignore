@@ -28,6 +28,15 @@ yarn-error.log*
 
 # env files
 .env*
+!.env.example
+
+# firebase / emulators
+/functions/node_modules
+/functions/lib
+/.firebase/
+*-debug.log
+.runtimeconfig.json
+/emulator-data
 
 # vercel
 .vercel
