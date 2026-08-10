@@ -10,7 +10,11 @@ import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/ToastViewport";
 import { generateTeamLink } from "@/lib/services/auth";
-import { MODAL_COPY } from "@/lib/data/content";
+import { MODAL_COPY, WHATSAPP } from "@/lib/data/content";
+import { buildCapsuleShareUrl } from "@/lib/services/whatsapp";
+import { WhatsAppIcon } from "@/components/whatsapp/WhatsAppIcon";
+import { WhatsAppTeaser } from "@/components/whatsapp/WhatsAppTeaser";
+import { WhatsAppAssistantOptIn } from "@/components/whatsapp/WhatsAppAssistantOptIn";
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -72,6 +76,10 @@ function StartStep({ onSubmit }: StartStepProps) {
         {...register("email")}
       />
 
+      {/* Novedad: announce the WhatsApp channel *before* the cápsula exists —
+          expectation only, no number asked at this point. */}
+      <WhatsAppTeaser />
+
       <Button
         type="submit"
         disabled={!isValid}
@@ -92,10 +100,11 @@ function StartStep({ onSubmit }: StartStepProps) {
 
 interface LinkStepProps {
   genLink: string;
+  company: string;
   onClose: () => void;
 }
 
-function LinkStep({ genLink, onClose }: LinkStepProps) {
+function LinkStep({ genLink, company, onClose }: LinkStepProps) {
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -117,6 +126,8 @@ function LinkStep({ genLink, onClose }: LinkStepProps) {
     }
     showToast({ title: "Enlace copiado" });
   };
+
+  const whatsappShareHref = buildCapsuleShareUrl({ link: genLink, company });
 
   const mailtoHref = `mailto:?subject=${encodeURIComponent(
     MODAL_COPY.mailtoSubject
@@ -166,6 +177,31 @@ function LinkStep({ genLink, onClose }: LinkStepProps) {
         />
       </div>
 
+      {/* Send by WhatsApp — the novedad, given top billing at the moment the
+          user actually needs a channel to distribute the cápsula. */}
+      <div className="flex flex-col gap-1.5">
+        <a
+          href={whatsappShareHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="whatsapp-share"
+          className="inline-flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold rounded-full transition-all hover:brightness-95"
+          style={{ backgroundColor: "#25D366", color: "#0B2E1C" }}
+        >
+          <WhatsAppIcon size={17} color="#0B2E1C" />
+          {WHATSAPP.share.button}
+          <span
+            className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono leading-none"
+            style={{ backgroundColor: "rgba(255,255,255,.65)", color: "#0B2E1C" }}
+          >
+            {WHATSAPP.badge}
+          </span>
+        </a>
+        <p className="text-[11px] leading-relaxed text-foreground/40">
+          {WHATSAPP.share.hint}
+        </p>
+      </div>
+
       {/* Action buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Button
@@ -186,6 +222,9 @@ function LinkStep({ genLink, onClose }: LinkStepProps) {
           {MODAL_COPY.link.emailButton}
         </a>
       </div>
+
+      {/* Talk to the assistant yourself — own number, explicit opt-in. */}
+      <WhatsAppAssistantOptIn link={genLink} company={company} source="capsula" />
 
       <Button
         type="button"
@@ -227,18 +266,21 @@ export default function QuickStartModal({
 }: QuickStartModalProps) {
   const [step, setStep] = React.useState<"start" | "link">("start");
   const [genLink, setGenLink] = React.useState<string>("");
+  const [company, setCompany] = React.useState<string>("");
 
   // Reset to start step when modal closes
   React.useEffect(() => {
     if (!open) {
       setStep("start");
       setGenLink("");
+      setCompany("");
     }
   }, [open]);
 
-  const handleStart = (company: string) => {
-    const link = generateTeamLink(company);
+  const handleStart = (companyName: string) => {
+    const link = generateTeamLink(companyName);
     setGenLink(link);
+    setCompany(companyName);
     setStep("link");
   };
 
@@ -256,7 +298,7 @@ export default function QuickStartModal({
 
         {/* Content */}
         <Dialog.Content
-          className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[452px] rounded-2xl bg-background p-6 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 mx-4"
+          className="fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[452px] max-h-[90vh] overflow-y-auto rounded-2xl bg-background p-6 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 mx-4"
           style={{ maxWidth: "min(452px, calc(100vw - 2rem))" }}
           aria-describedby={undefined}
         >
@@ -299,7 +341,7 @@ export default function QuickStartModal({
           {step === "start" ? (
             <StartStep onSubmit={handleStart} />
           ) : (
-            <LinkStep genLink={genLink} onClose={handleClose} />
+            <LinkStep genLink={genLink} company={company} onClose={handleClose} />
           )}
         </Dialog.Content>
       </Dialog.Portal>

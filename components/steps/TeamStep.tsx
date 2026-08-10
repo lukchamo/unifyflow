@@ -5,6 +5,10 @@ import { useAppStore } from "@/lib/store/useAppStore";
 import { selectProgressText } from "@/lib/store/selectors";
 import { Button } from "@/components/ui/Button";
 import { Pill } from "@/components/ui/Pill";
+import { WhatsAppIcon } from "@/components/whatsapp/WhatsAppIcon";
+import { generateTeamLink } from "@/lib/services/auth";
+import { buildCapsuleShareUrl } from "@/lib/services/whatsapp";
+import { WHATSAPP } from "@/lib/data/content";
 import { TeamMemberRow } from "./TeamMemberRow";
 import { InviteRow } from "./InviteRow";
 
@@ -14,6 +18,13 @@ export function TeamStep() {
   const inviteMember = useAppStore((s) => s.inviteMember);
   const setStep = useAppStore((s) => s.setStep);
   const progressText = useAppStore(selectProgressText);
+
+  // One cápsula link per visit — generateTeamLink appends a random code, so it
+  // must not be recomputed on every render.
+  const capsuleLink = React.useMemo(
+    () => generateTeamLink(org.nombre),
+    [org.nombre]
+  );
 
   return (
     <div
@@ -120,7 +131,12 @@ export function TeamStep() {
             {/* Team member rows */}
             <div className="flex flex-col">
               {team.map((member) => (
-                <TeamMemberRow key={member.id} member={member} />
+                <TeamMemberRow
+                  key={member.id}
+                  member={member}
+                  capsuleLink={capsuleLink}
+                  company={org.nombre}
+                />
               ))}
             </div>
 
@@ -139,6 +155,26 @@ export function TeamStep() {
           >
             Ver el mapa vivo →
           </Button>
+
+          {/* Distribution lives here, one rung below the flow's own CTA. */}
+          <a
+            href={buildCapsuleShareUrl({ link: capsuleLink, company: org.nombre })}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="team-whatsapp-share"
+            className="inline-flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold rounded-lg transition-all hover:brightness-95"
+            style={{ backgroundColor: "#25D366", color: "#0B2E1C" }}
+          >
+            <WhatsAppIcon size={17} color="#0B2E1C" />
+            {WHATSAPP.share.button}
+            <span
+              className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono leading-none"
+              style={{ backgroundColor: "rgba(255,255,255,.65)", color: "#0B2E1C" }}
+            >
+              {WHATSAPP.badge}
+            </span>
+          </a>
+
           <Button
             variant="ghost"
             size="md"

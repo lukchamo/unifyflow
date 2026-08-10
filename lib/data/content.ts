@@ -371,3 +371,145 @@ export const MODAL_COPY = {
   mailtoBody:
     'Responde 3–4 preguntas para dibujar el mapa de nuestros procesos:\n\nhttps://{link}\n\nGracias.',
 } as const;
+
+// --- WHATSAPP CHANNEL -------------------------------------------------------
+// Copy for the WhatsApp cápsula channel. Kept here so the "novedad" wording
+// lives next to the rest of the product voice and can be tuned without
+// touching components.
+
+export const WHATSAPP = {
+  badge: 'NUEVO',
+
+  /** Teaser shown *before* the cápsula exists — sets expectation, asks nothing. */
+  teaser: {
+    title: 'Ahora tu cápsula también viaja por WhatsApp',
+    paragraph:
+      'Además del enlace, podrás enviar la cápsula por WhatsApp y tu equipo puede responder ahí mismo —escribiendo o con notas de voz— hablando con el asistente de Unify.',
+  },
+
+  /** Actions on the "tu enlace está listo" step. */
+  share: {
+    title: 'Comparte la cápsula',
+    button: 'Enviar por WhatsApp',
+    hint: 'Se abre tu WhatsApp con el mensaje escrito. Tú eliges a quién se lo mandas; nosotros no guardamos ese número.',
+  },
+
+  /** Opt-in card: the person hands us their own number. */
+  optIn: {
+    title: 'Habla con el asistente por WhatsApp',
+    paragraph:
+      'Si prefieres no entrar a la web, deja tu número y conversa con el asistente de Unify por WhatsApp: te hace las preguntas, tú respondes cuando puedas, por texto o con notas de voz.',
+    bullets: [
+      'Responde con notas de voz mientras conduces o estás en planta.',
+      'Retomas la conversación cuando quieras; no se pierde el hilo.',
+      'Sin instalar nada, sin cuenta ni contraseña.',
+    ],
+    fieldPhone: {
+      label: 'Tu WhatsApp',
+      placeholder: '+34 600 123 456',
+    },
+    consentPrefix: 'Autorizo a UnifyFlow a escribirme por WhatsApp a este número para la entrevista y acepto los ',
+    consentLinkLabel: 'términos del canal de WhatsApp',
+    consentSuffix: '. Puedo darme de baja escribiendo BAJA en cualquier momento.',
+    button: 'Activar asistente en WhatsApp',
+    errorPhone: 'Escribe un número válido con prefijo, p. ej. +34 600 123 456.',
+    errorConsent: 'Necesitamos tu autorización para poder escribirte.',
+    confirmToast: 'Abriendo WhatsApp para confirmar tu alta',
+    confirmMicro:
+      'Doble confirmación: se abrirá WhatsApp con un mensaje de alta. El canal queda activo cuando lo envíes.',
+  },
+
+  /** Invitee-side entry point, inside the interview. */
+  interviewee: {
+    title: '¿Prefieres responder por WhatsApp?',
+    paragraph:
+      'Escríbenos y el asistente de Unify te hace las mismas preguntas por WhatsApp. Puedes contestar con notas de voz.',
+    button: 'Responder por WhatsApp',
+    micro:
+      'Escribes tú primero desde tu móvil: ese mensaje es tu autorización. Consulta los términos del canal.',
+  },
+
+  termsHref: '/legal/whatsapp',
+} as const;
+
+// --- WHATSAPP TERMS ---------------------------------------------------------
+// Full text of the WhatsApp channel terms. `version` must match
+// WHATSAPP_TERMS_VERSION in lib/services/whatsapp.ts.
+
+export const WHATSAPP_TERMS = {
+  version: '2026-08-10',
+  updatedAt: '10 de agosto de 2026',
+  title: 'Términos del canal de WhatsApp',
+  intro:
+    'Estos términos regulan el canal de WhatsApp de UnifyFlow: qué pasa cuando nos dejas tu número, qué te enviamos, qué guardamos y cómo te das de baja. Al marcar la casilla de autorización aceptas lo que sigue.',
+  sections: [
+    {
+      heading: '1. Qué estás autorizando',
+      paragraphs: [
+        'Autorizas a UnifyFlow a iniciar y mantener una conversación contigo por WhatsApp en el número que nos facilitas, con la única finalidad de realizar tu entrevista de procesos y las aclaraciones que se deriven de ella.',
+        'La autorización es tuya y solo sobre tu número. No puedes dar de alta el número de otra persona: para invitar a alguien, comparte la cápsula desde tu propio WhatsApp y será esa persona quien decida escribirnos.',
+      ],
+    },
+    {
+      heading: '2. Doble confirmación',
+      paragraphs: [
+        'Marcar la casilla registra tu autorización. El canal no se activa hasta que envías desde tu teléfono el mensaje de alta que abrimos por ti. Ese segundo paso confirma que el número es realmente tuyo.',
+      ],
+    },
+    {
+      heading: '3. Qué mensajes recibirás',
+      paragraphs: [
+        'Recibirás las preguntas de la entrevista, recordatorios puntuales si dejas la conversación a medias y la confirmación de que tus respuestas se han guardado.',
+      ],
+      list: [
+        'No enviamos publicidad ni comunicaciones comerciales por este canal.',
+        'No compartimos tu número con terceros para fines de marketing.',
+        'La frecuencia está ligada a tu entrevista: normalmente menos de cinco mensajes.',
+      ],
+    },
+    {
+      heading: '4. Notas de voz',
+      paragraphs: [
+        'Puedes responder con notas de voz. El audio se transcribe automáticamente para poder incorporar tu respuesta al mapa de procesos. Se conserva el audio original mientras dure la entrevista y se elimina cuando esta se cierra; la transcripción se trata igual que cualquier otra respuesta de texto.',
+      ],
+    },
+    {
+      heading: '5. Datos que tratamos',
+      paragraphs: [
+        'Tratamos tu número de teléfono, el contenido de los mensajes que intercambias con el asistente, las notas de voz y su transcripción, y la fecha y hora en que diste tu autorización junto con la versión de estos términos.',
+        'La base legal es tu consentimiento. Los datos se alojan en la Unión Europea y se tratan conforme al RGPD. Tu nombre no se muestra junto a lo que dices dentro del mapa.',
+      ],
+    },
+    {
+      heading: '6. WhatsApp como intermediario',
+      paragraphs: [
+        'La conversación viaja por la infraestructura de WhatsApp (Meta Platforms Ireland Ltd.), que actúa como proveedor del canal y aplica sus propias condiciones y política de privacidad. UnifyFlow no controla ese tratamiento.',
+      ],
+    },
+    {
+      heading: '7. Conservación',
+      paragraphs: [
+        'Conservamos la conversación mientras la entrevista siga abierta y, después, durante el tiempo necesario para mantener el mapa de procesos de tu organización. El registro de tu consentimiento se conserva mientras el canal esté activo y hasta tres años después de la baja, como prueba de que lo diste.',
+      ],
+    },
+    {
+      heading: '8. Baja y derechos',
+      paragraphs: [
+        'Escribe BAJA en el chat en cualquier momento: el canal se desactiva de inmediato y dejamos de escribirte. Retirar el consentimiento no afecta a la validez del tratamiento anterior.',
+        'Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a privacidad@unifyflow.eu, y reclamar ante la autoridad de control competente.',
+      ],
+    },
+    {
+      heading: '9. Coste',
+      paragraphs: [
+        'UnifyFlow no cobra por este canal. Se aplican las tarifas de datos de tu operador.',
+      ],
+    },
+    {
+      heading: '10. Cambios',
+      paragraphs: [
+        'Si estos términos cambian de forma sustancial, te lo comunicaremos por el propio canal antes de seguir escribiéndote y podrás darte de baja sin más trámite.',
+      ],
+    },
+  ],
+} as const;

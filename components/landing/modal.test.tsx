@@ -174,6 +174,47 @@ describe("QuickStartModal", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it("announces the WhatsApp novedad on the form, without asking for a number", () => {
+    renderModal();
+    expect(screen.getByTestId("whatsapp-teaser")).toBeInTheDocument();
+    // Only company + email are asked for at this point.
+    expect(screen.queryByLabelText(/Tu WhatsApp/i)).toBeNull();
+  });
+
+  it("offers a WhatsApp share link carrying the generated cápsula", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await user.type(screen.getByLabelText(/Nombre de la empresa/i), "Acme S.L.");
+    await user.type(screen.getByLabelText(/Tu email/i), "a@b.com");
+    await user.click(screen.getByRole("button", { name: /Generar enlace de equipo/i }));
+
+    await waitFor(() => screen.getByText("Tu enlace está listo."));
+
+    const linkInput = screen.getByRole("textbox", { name: /enlace/i }) as HTMLInputElement;
+    const share = screen.getByTestId("whatsapp-share");
+    const href = decodeURIComponent(share.getAttribute("href") ?? "");
+
+    expect(href.startsWith("https://wa.me/?text=")).toBe(true);
+    expect(href).toContain(`https://${linkInput.value}`);
+    expect(href).toContain("Acme S.L.");
+  });
+
+  it("offers the assistant opt-in on the link step, collapsed and consent-gated", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await user.type(screen.getByLabelText(/Nombre de la empresa/i), "Acme S.L.");
+    await user.type(screen.getByLabelText(/Tu email/i), "a@b.com");
+    await user.click(screen.getByRole("button", { name: /Generar enlace de equipo/i }));
+
+    await waitFor(() => screen.getByText("Tu enlace está listo."));
+
+    const disclosure = screen.getByTestId("whatsapp-optin-disclosure");
+    fireEvent.click(disclosure);
+
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    expect(screen.getByRole("button", { name: /Activar asistente/i })).toBeDisabled();
+  });
+
   it("resets to start step when modal is closed and reopened", async () => {
     const user = userEvent.setup();
     const { rerender } = render(

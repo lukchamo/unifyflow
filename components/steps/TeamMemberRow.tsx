@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Avatar } from "@/components/ui/Avatar";
+import { WhatsAppIcon } from "@/components/whatsapp/WhatsAppIcon";
+import { buildCapsuleShareUrl } from "@/lib/services/whatsapp";
 import type { Member } from "@/lib/schemas";
 
 interface MemberStatusPillProps {
@@ -37,9 +39,16 @@ function MemberStatusPill({ done }: MemberStatusPillProps) {
 
 export interface TeamMemberRowProps {
   member: Member;
+  /** Cápsula link; enables the WhatsApp nudge for members still pending. */
+  capsuleLink?: string;
+  company?: string;
 }
 
-export function TeamMemberRow({ member }: TeamMemberRowProps) {
+export function TeamMemberRow({
+  member,
+  capsuleLink,
+  company,
+}: TeamMemberRowProps) {
   return (
     <div
       data-testid="member-row"
@@ -60,6 +69,21 @@ export function TeamMemberRow({ member }: TeamMemberRowProps) {
           {member.cargo} · {member.area}
         </p>
       </div>
+      {/* Nudge the ones still pending, where the reminder actually lands. */}
+      {!member.done && capsuleLink && (
+        <a
+          href={buildCapsuleShareUrl({ link: capsuleLink, company })}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`Recordar a ${member.nombre} por WhatsApp`}
+          aria-label={`Recordar a ${member.nombre} por WhatsApp`}
+          className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0 transition-colors hover:brightness-95"
+          style={{ backgroundColor: "#F2FAF5" }}
+        >
+          <WhatsAppIcon size={14} />
+        </a>
+      )}
+
       <MemberStatusPill done={member.done} />
     </div>
   );

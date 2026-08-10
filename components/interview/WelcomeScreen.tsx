@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/Button";
+import { WhatsAppIntervieweeCard } from "@/components/whatsapp/WhatsAppIntervieweeCard";
 import { MEMBER_NOMBRE, MEMBER_CARGO, MEMBER_AREA } from "./useInterview";
 
 export interface WelcomeScreenProps {
   onStart: () => void;
+  /** Invitation token, forwarded to the WhatsApp escape hatch. */
+  slug?: string;
 }
 
 /**
@@ -13,7 +16,7 @@ export interface WelcomeScreenProps {
  * Shows inviter info, title, description, privacy panel, prefilled fields,
  * and the start CTA.
  */
-export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
+export function WelcomeScreen({ onStart, slug = "" }: WelcomeScreenProps) {
   return (
     <div className="flex flex-col gap-6 px-5 py-8 max-w-lg mx-auto w-full">
       {/* Inviter row */}
@@ -110,6 +113,10 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       <Button size="lg" onClick={onStart} className="w-full">
         Empezar la entrevista →
       </Button>
+
+      {/* Alternative channel — offered after the primary CTA so it reads as an
+          escape hatch, not a competing path. */}
+      <WhatsAppIntervieweeCard slug={slug} name={MEMBER_NOMBRE} />
 
       {/* Footer */}
       <p className="text-xs text-center" style={{ color: "#8A9C95" }}>

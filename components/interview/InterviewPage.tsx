@@ -7,7 +7,7 @@ import { InterviewScreen } from "./InterviewScreen";
 import { ThanksScreen } from "./ThanksScreen";
 
 export interface InterviewPageProps {
-  /** The [slug] route param — decorative, used for display only. */
+  /** The [slug] route param — identifies the cápsula in the WhatsApp hand-off. */
   slug: string;
 }
 
@@ -18,7 +18,7 @@ export interface InterviewPageProps {
  *
  * On desktop the content is centered in a max-width column.
  */
-export function InterviewPage({ slug: _slug }: InterviewPageProps) {
+export function InterviewPage({ slug }: InterviewPageProps) {
   const { phase, currentIndex, answers, isTyping, questions, start, submitAnswer } =
     useInterview();
 
@@ -29,7 +29,7 @@ export function InterviewPage({ slug: _slug }: InterviewPageProps) {
     >
       {/* Center column for desktop */}
       <div className="w-full max-w-lg mx-auto flex-1 flex flex-col">
-        {phase === "welcome" && <WelcomeScreen onStart={start} />}
+        {phase === "welcome" && <WelcomeScreen onStart={start} slug={slug} />}
         {phase === "question" && (
           <InterviewScreen
             currentIndex={currentIndex}
